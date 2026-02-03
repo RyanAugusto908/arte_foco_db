@@ -1,0 +1,14 @@
+# Dependências (pasta muito pesada que não deve ir pro Git)
+node_modules/
+
+# Variáveis de ambiente (contém suas senhas do banco e do Aiven)
+.env
+
+# Logs de erros
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Pastas de sistema (opcional)
+.DS_Store
+Thumbs.db

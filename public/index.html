@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arte & Foco - DataBase</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <Header>
+        <div class="title">Arte & Foco - DataBase</div>
+        <div class="header-buttons">  <!-- Novo container para os botões -->
+            <button onclick="goToLogin()">Ir para Login</button>  <!-- Novo botão -->
+            <button onclick="logout()">Logout</button>
+        </div>
+    </Header>
+
+    <main>
+        <!-- Seções de CRUD permanecem iguais -->
+        <section class="adc_usuario">
+            <div class="adc_title">ADICIONAR USUARIO</div>
+            <input id="addUsuario" placeholder="Nome do Usuario" required>
+            <input id="addEmail" placeholder="Email do Usuario" type="email" required>
+            <input id="addSenha" placeholder="Senha do Usuario" type="password" required>
+            <button onclick="cadastrar()">Adicionar</button>
+            <div id="successMessage" style="color: green; margin-top: 10px;"></div>
+            <div id="errorMessage" style="color: red; margin-top: 10px;"></div>
+        </section>
+<!--
+        <section class="editar_usuario">
+            <div class="edit_title">EDITAR USUÁRIO:</div>
+            <input id="editPos" placeholder="ID do Usuario" required>
+            <input id="editUsuario" placeholder="Novo nome" required>
+            <input id="editEmail" placeholder="Novo email" type="email" required>
+            <input id="editSenha" placeholder="Nova senha" type="password" required>
+            <button onclick="edit()">Editar</button>
+        </section>
+    -->
+        <section class="deletar_usuario">
+            <div class="delete_title">DELETAR USUÁRIO:</div>
+            <input id="delPos" placeholder="ID do Usuario" required>
+            <button onclick="delItem()">Deletar</button>
+        </section>
+
+        <section class="visualizar_usuario">
+            <div class="view_title">VISUALIZAR USUÁRIO</div>
+            <button onclick="show()">Visualizar</button>
+            <pre id="lista"></pre>
+        </section>
+    </main>
+
+    <footer></footer>
+    <script src="index.js"></script>
+</body>
+
+</html>

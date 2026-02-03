@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arte & Foco - DataBase</title>
+    <link rel="stylesheet" href="style.css"> <!-- Reusa o CSS existente -->
+</head>
+
+<body>
+    <header>
+        <div class="title">Arte & Foco - DataBase</div>
+    </header>
+
+    <main>
+        <section class="login_section">
+            <div class="adc_title">FAÇA SEU LOGIN:</div>
+            <input id="loginEmail" placeholder="Email" type="email" required>
+            <input id="loginSenha" placeholder="Senha" type="password" required>
+            <button onclick="login()">Entrar</button>
+            <button onclick="goToCadastro()">Cadastrar</button>
+            <div id="errorMessage" style="color: red; margin-top: 10px;"></div>
+        </section>
+    </main>
+
+    <footer></footer>
+    <script src="login.js"></script> <!-- Novo script para login -->
+</body>
+
+</html>
