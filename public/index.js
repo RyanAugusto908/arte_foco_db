@@ -56,7 +56,7 @@ async function cadastrar() {
 
 async function edit() {
   const id = document.getElementById("editPos").value;
-  const name = document.getElementById("editUsuario").value; // Alterado para 'name' para bater com o server.js
+  const nome = document.getElementById("editUsuario").value; // Alterado para 'name' para bater com o server.js
   const email = document.getElementById("editEmail").value;
   const senha = document.getElementById("editSenha").value;
 
@@ -72,7 +72,7 @@ async function edit() {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${getToken()}` // Envia o token de segurança
       },
-      body: JSON.stringify({ name, email, senha }) // Enviando 'name' como o server.js espera
+      body: JSON.stringify({ nome, email, senha })
     });
 
     if (!response.ok) throw new Error(`Erro ${response.status}`);
