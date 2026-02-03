@@ -119,5 +119,8 @@ app.delete("/usuarios/:id", (req, res) => {
 // Servir arquivos estáticos (ajustado para ser mais genérico)
 app.use(express.static('public'));
 
-// Inicia o servidor usando a variável PORT
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/public/login.html');
+});
+
 app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
