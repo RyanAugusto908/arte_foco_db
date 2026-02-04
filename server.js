@@ -28,7 +28,10 @@ const db = mysql.createPool({
     port: process.env.MYSQLPORT || 3306,
     waitForConnections: true,
     connectionLimit: 10,
-    queueLimit: 0
+    queueLimit: 0,
+    ssl: {
+        rejectUnauthorized: false // Adicione esta linha para conexões com Railway/Cloud
+    }
 });
 
 // Teste de conexão (Pool não precisa de .connect, mas vamos validar)
@@ -64,8 +67,11 @@ app.post("/login", (req, res) => {
 // GET - Listar usuários
 app.get("/usuarios", (req, res) => {
     db.query("SELECT id, nome, email FROM usuarios", (err, results) => {
-        if (err) return res.status(500).json(err);
-        res.json(results);
+        // Altere isso em todas as rotas onde tem db.query
+        if (err) {
+            console.error("Erro no Banco de Dados:", err); // Isso vai te mostrar o erro real no terminal!
+            return res.status(500).json({ error: "Erro interno no servidor", details: err.message });
+        }
     });
 });
 
@@ -88,7 +94,7 @@ app.post("/usuarios", async (req, res) => {
 // PUT - Editar usuário
 app.put("/usuarios/:id", async (req, res) => {
     const id = req.params.id;
-    const { nome, email, senha } = req.body; 
+    const { nome, email, senha } = req.body;
 
     let query = "UPDATE usuarios SET nome = ?, email = ?";
     let params = [nome, email];
