@@ -24,13 +24,15 @@ const db = mysql.createPool({
     host: process.env.MYSQLHOST,
     user: process.env.MYSQLUSER,
     password: process.env.MYSQLPASSWORD,
-    database: process.env.MYSQLDATABASE, // Ele vai usar "railway" conforme seu .env
+    database: process.env.MYSQLDATABASE,
     port: process.env.MYSQLPORT,
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
     ssl: {
-        rejectUnauthorized: false // ESSENCIAL para evitar o ECONNRESET
+        // Tente mudar para este formato se o anterior falhar
+        minVersion: 'TLSv1.2', 
+        rejectUnauthorized: false
     }
 });
 
