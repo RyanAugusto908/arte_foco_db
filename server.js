@@ -21,16 +21,16 @@ app.use(express.static('public'));
 // O Railway fornece uma URL de conexão ou variáveis separadas.
 // Esta configuração funciona tanto local quanto no Railway.
 const db = mysql.createPool({
-    host: process.env.MYSQLHOST || "localhost",
-    user: process.env.MYSQLUSER || "root",
-    password: process.env.MYSQLPASSWORD || "",
-    database: process.env.MYSQLDATABASE || "arte_foco_db",
-    port: process.env.MYSQLPORT || 3306,
+    host: process.env.MYSQLHOST,
+    user: process.env.MYSQLUSER,
+    password: process.env.MYSQLPASSWORD,
+    database: process.env.MYSQLDATABASE, // Ele vai usar "railway" conforme seu .env
+    port: process.env.MYSQLPORT,
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
     ssl: {
-        rejectUnauthorized: false // Adicione esta linha para conexões com Railway/Cloud
+        rejectUnauthorized: false // ESSENCIAL para evitar o ECONNRESET
     }
 });
 
