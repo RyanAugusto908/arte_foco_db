@@ -1,87 +1,72 @@
-require('dotenv').config();
 const express = require("express");
 const cors = require("cors");
 const mysql = require("mysql2");
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
+const jwt = require("jsonwebtoken");  // Para JWT
 
 const app = express();
 
-// --- CONFIGURAÇÕES DE AMBIENTE ---
-// O Railway define a porta automaticamente. Se não houver, usa 3001.
-const PORT = process.env.PORT || 3001;
-// Nunca deixe sua chave secreta exposta no código em produção!
-const SECRET_KEY = process.env.JWT_SECRET || "chave_temporaria_local";
-
+const SECRET_KEY = "ryan123";
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
-// --- CONEXÃO COM BANCO DE DADOS ---
-// O Railway fornece uma URL de conexão ou variáveis separadas.
-// Esta configuração funciona tanto local quanto no Railway.
-const db = mysql.createPool({
-    host: process.env.MYSQLHOST,
-    user: process.env.MYSQLUSER,
-    password: process.env.MYSQLPASSWORD,
-    database: process.env.MYSQLDATABASE,
-    port: Number(process.env.MYSQLPORT),
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0,
-    ssl: {
-        // Tente mudar para este formato se o anterior falhar
-        minVersion: 'TLSv1.2', 
-        rejectUnauthorized: false
-    }
+const db = mysql.createConnection({
+    host: "localhost",
+    user: "root",
+    password: "",
+    database: "arte_foco_db"
 });
 
-// Teste de conexão (Pool não precisa de .connect, mas vamos validar)
-db.getConnection((err, connection) => {
+db.connect((err) => {
     if (err) {
-        console.error("Erro ao conectar no MySQL do Railway:", err);
+        console.log("Erro MySQL:", err);
         return;
     }
-    console.log("Conectado ao MySQL com sucesso!");
-    connection.release();
+    console.log("Conectado ao MySQL.");
 });
 
-// --- ROTAS ---
 
-// Rota POST /login
+// Rota POST /login - Autenticar usuário
 app.post("/login", (req, res) => {
     const { email, senha } = req.body;
-    if (!email || !senha) return res.status(400).json({ error: "Email e senha são obrigatórios." });
 
+    if (!email || !senha) {
+        return res.status(400).json({ error: "Email e senha são obrigatórios." });
+    }
+
+    // Busca usuário pelo email
     db.query("SELECT * FROM usuarios WHERE email = ?", [email], async (err, results) => {
         if (err) return res.status(500).json(err);
         if (results.length === 0) return res.status(401).json({ error: "Email ou senha incorretos." });
 
         const user = results[0];
+        // Compara senha hashada
         const isPasswordValid = await bcrypt.compare(senha, user.senha);
         if (!isPasswordValid) return res.status(401).json({ error: "Email ou senha incorretos." });
 
+        // Gera token JWT (expira em 1 hora)
         const token = jwt.sign({ id: user.id, nome: user.nome, email: user.email }, SECRET_KEY, { expiresIn: "1h" });
         res.json({ message: "Login bem-sucedido", token, user: { id: user.id, nome: user.nome, email: user.email } });
     });
 });
 
-// GET - Listar usuários
+// GET - Listar usuários (AGORA PROTEGIDA)
 app.get("/usuarios", (req, res) => {
     db.query("SELECT id, nome, email FROM usuarios", (err, results) => {
-        // Altere isso em todas as rotas onde tem db.query
-        if (err) {
-            console.error("Erro no Banco de Dados:", err); // Isso vai te mostrar o erro real no terminal!
-            return res.status(500).json({ error: "Erro interno no servidor", details: err.message });
-        }
+        if (err) return res.status(500).json(err);
+        res.json(results);
     });
 });
 
-// POST - Criar usuário (Removida a duplicata que existia no seu código)
+// POST - Criar usuário (AGORA PROTEGIDA)
 app.post("/usuarios", async (req, res) => {
     const { nome, email, senha } = req.body;
-    if (!nome || !email || !senha) return res.status(400).json({ error: "Nome, email e senha são obrigatórios." });
-
+    
+    if (!nome || !email || !senha) {
+        return res.status(400).json({ error: "Nome, email e senha são obrigatórios." });
+    }
+    
     try {
         const hashedSenha = await bcrypt.hash(senha, 10);
         db.query("INSERT INTO usuarios (nome, email, senha) VALUES (?, ?, ?)", [nome, email, hashedSenha], (err, results) => {
@@ -93,30 +78,26 @@ app.post("/usuarios", async (req, res) => {
     }
 });
 
-// PUT - Editar usuário
-app.put("/usuarios/:id", async (req, res) => {
-    const id = req.params.id;
+// POST - Criar usuário (AGORA PÚBLICO - se)
+app.post("/usuarios", async (req, res) => {
     const { nome, email, senha } = req.body;
-
-    let query = "UPDATE usuarios SET nome = ?, email = ?";
-    let params = [nome, email];
-
-    if (senha) {
-        const hashedSenha = await bcrypt.hash(senha, 10);
-        query += ", senha = ?";
-        params.push(hashedSenha);
+    
+    if (!nome || !email || !senha) {
+        return res.status(400).json({ error: "Nome, email e senha são obrigatórios." });
     }
-
-    query += " WHERE id = ?";
-    params.push(id);
-
-    db.query(query, params, (err, results) => {
-        if (err) return res.status(500).json(err);
-        res.json({ message: "Usuário atualizado com sucesso" });
-    });
+    
+    try {
+        const hashedSenha = await bcrypt.hash(senha, 10);
+        db.query("INSERT INTO usuarios (nome, email, senha) VALUES (?, ?, ?)", [nome, email, hashedSenha], (err, results) => {
+            if (err) return res.status(500).json(err);
+            res.json({ message: "Usuário adicionado", id: results.insertId });
+        });
+    } catch (err) {
+        res.status(500).json({ error: "Erro ao processar senha." });
+    }
 });
 
-// DELETE - Deletar usuário
+// DELETE - Deletar usuário (AGORA PROTEGIDA)
 app.delete("/usuarios/:id", (req, res) => {
     const id = req.params.id;
     db.query("DELETE FROM usuarios WHERE id = ?", [id], (err) => {
@@ -125,11 +106,8 @@ app.delete("/usuarios/:id", (req, res) => {
     });
 });
 
-// Servir arquivos estáticos (ajustado para ser mais genérico)
-app.use(express.static('public'));
+// Servir arquivos estáticos
+app.use(express.static('.'));
 
-app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/public/login.html');
-});
-
-app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
+// Inicia o servidor
+app.listen(3001, () => console.log("Servidor rodando na porta 3001"));
